@@ -1,0 +1,165 @@
+[
+  {
+      "@url" : "/task/add",
+       "@controller": "addTask@Tasky"
+  },
+  {
+      "@url" : "/task/delete",
+       "@controller": "deleteTask@Tasky"
+  },
+  {
+    "@url" : "/task/update",
+    "@controller": "updateTask@Tasky"
+  },
+  {
+      "@url" : "/task/status/update",
+       "@controller": "changeStatus@Tasky"
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

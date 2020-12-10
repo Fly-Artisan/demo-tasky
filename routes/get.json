@@ -1,0 +1,18 @@
+[
+    {
+        "@url":"/404",
+        "@static":"404/error_page",
+        "@payload": {
+            "app_name":"ERROR::404"
+        }
+    },
+    {
+        "@url":"/",
+        "@name": "i",
+        "@static": "app"
+    },
+    {
+        "@url":"/task/fetch",
+        "@controller": "fetchTask@Tasky"
+    }
+]

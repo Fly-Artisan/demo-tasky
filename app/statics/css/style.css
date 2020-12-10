@@ -1,0 +1,39 @@
+body {
+    background-color: #2e2e2e;
+}
+.text-pending {
+    color: #ef5350 !important;
+}
+
+.btn-poppy-red {
+    background-color: #ef5350 !important;
+}
+.bg-poppy-red {
+    background-color: #ef5350 !important;
+}
+.task-card{
+    background: #fbfbfb !important;
+}
+
+.btn-round {
+    border-radius: 1.5rem;
+    bottom: 15px !important;
+    box-shadow: none !important;
+}
+
+._spinner {
+    width: 5%;
+    margin: 0 auto !important;
+}
+
+.btn-round:hover {
+   box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12) !important;
+}
+
+.task-control-btn {
+    border-radius: 1rem;
+    padding: .6rem !important;
+}
+td {
+    font-size: 18px !important;
+}
