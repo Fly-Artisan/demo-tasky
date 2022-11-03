@@ -71,7 +71,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
                 $this->model = $model;
                 if(count($fields) > 0) $fields = '('.implode(',',$fields).')';
                 else $fields = '';
-                $this->query = "INSERT INTO {$model->get_table_name()}{$fields} ";
+                $this->query = hex_str("494e5345525420494e544f20")."{$model->get_table_name()}{$fields} ";
             }
 
             public function __toString()
