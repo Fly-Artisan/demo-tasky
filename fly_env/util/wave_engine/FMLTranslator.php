@@ -102,7 +102,8 @@ abstract class FMLTranslator {
     }
 
     protected function match_tag_tokens()
-    {   $this->parseTagData();
+    {  
+        $this->parseTagData();
         if($this->quotedAttrTag && self::$hasAttributes) 
             $this->fetchQuotedTagProps();
         else if(self::$hasAttributes) 
@@ -112,6 +113,10 @@ abstract class FMLTranslator {
     private function fetchCurlyTagProps() 
     { 
         while(preg_match(Pattern::curlyFullAttributeMatch(),$this->tagData,$match)) {
+    
+            if(preg_match(Pattern::findAttributeValue(),$match[2], $mt)) {
+                $match[2] = $mt[1];
+            }
             $this->tag_token_props[trim($match[1])] = $match[2];
             $this->tagData = str_replace($match[0],'',$this->tagData);
         }

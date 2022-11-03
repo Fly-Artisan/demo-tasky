@@ -6,17 +6,33 @@ abstract class Validator extends FLYFormValidator {
 
     protected FLYFormValidator $validator;
 
-    protected array $model    = [];
+    protected $model;
 
-    protected array $response = [];
+    protected $response;
     
     public function __construct(?Request $request)
     {
         if($request <> null) {
-            $this->validator = self::check($request, $this->error_report());
+            $error_report = $this->error_report();
+            $this->validator = self::check($request, $error_report);
             $this->request   = $this->validator->get_request();
         }
     }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function validate()
+	{
+		return $this->validator->has_error();
+	}
+
+	public function getMessage() 
+	{
+		return $this->validator->get_error_message();
+	}
 
     abstract protected function error_report(): array;
 }

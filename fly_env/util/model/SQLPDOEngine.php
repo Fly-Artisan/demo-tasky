@@ -10,7 +10,7 @@ namespace FLY\Model;
 use FLY_ENV\Util\Model\QueryBuilder;
 
 /**
- * @class SQLEngine
+ * @class SQLPDOEngine
  * @todo Implements PDO's methods
  */
 class SQLPDOEngine extends \PDO {
@@ -37,8 +37,7 @@ class SQLPDOEngine extends \PDO {
      * @param string $user
      * @param string $password
      * @return void
-     */
-    
+     */   
     public function __construct(?QueryBuilder $activeModel,string $host,string $db,string $user,string $password)
     {   
         try {
@@ -70,8 +69,7 @@ class SQLPDOEngine extends \PDO {
      * @param QueryBuilder|null $activeModel
      * @return void
      * @todo Check's to initialize transactions
-     */
-    
+     */ 
     private function checkTransaction(?QueryBuilder $activeModel) 
     {
         $this->activeModel = $activeModel;
@@ -95,7 +93,6 @@ class SQLPDOEngine extends \PDO {
      * @return array
      * @todo Execute's search query
      */
-
     public function executeSearchQuery(string $query): array
     {
         $this->pdo = $this->prepare($query);
@@ -112,7 +109,6 @@ class SQLPDOEngine extends \PDO {
      * @return integer
      * @todo Execute's insert query
      */
-
     public function executeSaveQuery(string $query,array $fields): int
     {
         $this->pdo = $this->prepare($query);
@@ -134,7 +130,6 @@ class SQLPDOEngine extends \PDO {
      * @return boolean
      * @todo Execute's update query
      */
-
     public function executeUpdateQuery(string $query): bool
     {
         return $this->executeCUD($query);
@@ -147,7 +142,6 @@ class SQLPDOEngine extends \PDO {
      * @return boolean
      * @todo Execute's delete query
      */
-
     public function executeDeleteQuery(string $query): bool
     {
         return $this->executeCUD($query);
@@ -159,8 +153,7 @@ class SQLPDOEngine extends \PDO {
      * @param string $query
      * @return array
      * @todo Execute's Procedures through the search method
-     */
-    
+     */   
     public function executeProcedures(string $query): array
     {
         return $this->executeSearchQuery($query);
@@ -172,8 +165,7 @@ class SQLPDOEngine extends \PDO {
      * @param string $query
      * @return bool
      * @todo Execute's insert, update and delete query
-     */
-    
+     */  
     private function executeCUD(string $query): bool
     {
         $this->pdo = $this->prepare($query);
@@ -188,12 +180,11 @@ class SQLPDOEngine extends \PDO {
      * @return bool
      * @todo Execute's create, insert, update and delete query
      */
-
     public function executeCRUD(string $query)
     {
-        if(strpos($query,'SELECT') === 0) {
+        if(strpos($query,hex_str('53454c454354')) === 0) {
             return $this->executeSearchQuery($query);
-        } else if(strpos($query,'CALL') === 0) {
+        } else if(strpos($query,hex_str('43414c4c')) === 0) {
             return $this->executeProcedures($query);
         }
         return $this->executeCUD($query);

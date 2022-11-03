@@ -19,7 +19,7 @@ class Event {
         return __CLASS__;
     }
 
-    static public function emit($eventName, $data = null) 
+    static public function trigger($eventName, $data = null) 
     {
         $payload = null;
         $eventName = strtolower($eventName);

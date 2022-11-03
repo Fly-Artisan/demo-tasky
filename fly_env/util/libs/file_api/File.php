@@ -9,6 +9,7 @@
 
 namespace FLY\Libs\File_API;
 
+use FLY\Security\KeyGen;
 
 /**
  * Description of File
@@ -21,6 +22,26 @@ class File {
     private static function assign(&$var, $value) 
     {
         $var = $value;
+    }
+
+    public static function rename($path)
+    {
+        $base        = pathinfo($path);
+        $file_ext    = $base['extension'];
+        $bare_name   = str_replace('.'.$file_ext,'',$base['basename']);
+        $bare_name   = preg_replace('/((\s+)|(\s*)\'(\s*))/', '', $bare_name);
+        $hashed_name = preg_replace('/(?:\#|\&|\=|\?)/','_',$bare_name.KeyGen::token(8,'',true).".{$file_ext}");
+        $oldname     = FLY_APP_ROOT_DIR.$path;
+        $newname     = FLY_APP_ROOT_DIR.self::default_path($path).'/'.$hashed_name;
+        rename($oldname, $newname);
+        return $hashed_name;
+    }
+
+    private static function default_path($path)
+    {
+        $path_arr = explode('/',$path);
+        unset($path_arr[count($path_arr) - 1 ]);
+        return implode('/',$path_arr);
     }
     
     public static function set_file(string $file_objectname) 
@@ -113,12 +134,12 @@ class File {
 
     public static function move_to(string $path) 
     {
-        if(file_exists($path.self::$file['name'])) return ['state' => false, 'payload' => 'file_exists'];
+        if(file_exists($path.self::$file['name'])) return (object)['state' => false, 'message' => 'file_exists'];
         
-        if(move_uploaded_file(self::$file['tmp_name'], $path.'/'.self::$file['name'])) {
-            return ['state' => true, 'payload' => 'success'];
+        if(move_uploaded_file(self::$file['tmp_name'], $path.self::$file['name'])) {
+            return (object)['state' => true, 'message' => 'success'];
         }
 
-        return ['state' => false, 'payload' => self::$file['error']];
+        return (object)['state' => false, 'message' => self::$file['error']];
     }
 }

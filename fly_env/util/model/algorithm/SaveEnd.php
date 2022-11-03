@@ -45,7 +45,6 @@ trait SaveEnd {
                 $this->result     = $model->getPDO()->executeSaveQuery($this->finalQuery,[]);
             }
 
-
             public function value()
             {
                 return $this->result;

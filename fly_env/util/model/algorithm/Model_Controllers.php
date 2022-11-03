@@ -16,8 +16,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
  */
 
  trait Model_Controllers {
-
-
+    
 	/**
 	 * @return QueryBuilder
 	 */
@@ -122,7 +121,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 	 * @return integer
 	 * @Todo It counts the total number of records in the referenced table.
 	 */
-	static function count(): int
+	static function length(): int
 	{
     	return self::_count(new Self);
 	}
@@ -469,8 +468,6 @@ use FLY_ENV\Util\Model\QueryBuilder;
 	{
     	return self::_query($query,new Self);
 	}
-
-
 
 	/**
 	 * @return string

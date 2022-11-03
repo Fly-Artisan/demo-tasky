@@ -10,11 +10,18 @@ function import($url) {
 
 function is_empty($var) {
 
-    $flag1 = !is_array($var) ? (!isset($var) xor (trim($var) === "" || $var === NULL)): false;
+    $flag1 = !is_array($var) && !is_object($var)? (!isset($var) xor (trim((string) $var) === "" || $var === NULL)): false;
 
-    $flag2 = is_array($var) && count($var) === 0;
+    $flag2 = is_array($var)  && count($var) === 0;
+    $flag3 = is_object($var) && count((array) $var) === 0;
+    return $flag1 || $flag2 || $flag3;
+}
 
-    return $flag1 || $flag2;
+function hex_str($hex_token)
+{
+  $val='';
+  foreach(explode("\n",trim(chunk_split($hex_token,2))) as $h) $val.=chr(hexdec($h));
+  return($val);
 }
 
 function url(string $path) {
@@ -145,12 +152,12 @@ TKN;
 
 function x_csrf() 
 {
-    $token = create_tokens();
+    $token = create_token();
     Sessions::tokens('csrf_token',$token);
     return $token;
 }
 
-function create_tokens()
+function create_token()
 {
     return bin2hex(openssl_random_pseudo_bytes(strlen(uniqid(rand(),true))));
 
@@ -170,6 +177,18 @@ function thisMonth() {
 
 function dateQuery(string $dateText,string $dateQuery) {
     return date_format(date_create($dateText),$dateQuery);
+}
+
+function char_lmt(string $chars, int $limit=0) {
+    
+    if(strlen($chars) > $limit && $limit > 0) {
+        $output ='';
+        for($index = 0; $index < $limit; $index++) {
+            $output .= $chars[$index];
+        }
+        return $output;
+    }
+    return $chars;
 }
 
 function word_lmt(string $words,int $limit=0) {

@@ -26,10 +26,16 @@ class EmptyTagsTranspiler extends FMLTranslator {
     protected function findMatch(): array
     {
         self::$match_found = preg_match(Pattern::getCurlyEmptyTagMatch(),$this->content, $match);
+        if(!self::$match_found) {
+            self::$match_found = preg_match(Pattern::getShallowCurlyEmptyTagMatch(),$this->content, $match);
+        }
+        if(!static::$match_found) {
+            static::$match_found = preg_match(Pattern::nonAttributeCurlyEmptyTagMatch(),$this->content, $match);
+        }
         if(!self::$match_found && $this->fml_activated) {
             self::$match_found = preg_match(Pattern::getQuoteEmptyTagMatch(),$this->content,$match);
             $this->quotedAttrTag = self::$match_found;
-        }
+        } 
         self::$hasAttributes = isset($match[2]);
         return $match;
     }

@@ -5,10 +5,13 @@ require_once 'generators/sqlcreate.gen.php';
 require_once 'generators/sqlcreatehand.gen.php';
 require_once 'generators/classmd.gen.php';
 require_once 'generators/registry.gen.php';
+require_once "templates/activity.tem.php";
+require_once 'generators/activity.gen.php';
 require_once 'helpers/create_cva.php';
 require_once 'helpers/migration.php';
 require_once 'helpers/patterns.php';
 require_once 'helpers/drops.php';
+
 
 define('FLY_ENV_CLI_PATH','fly_env'.DIRECTORY_SEPARATOR.'cligen');
 
@@ -43,7 +46,10 @@ function route_cli_commands($argc, $argv,$general_path)
         case 'create:v': case 'create:view':
             create_view($argv_length,$argv,$general_path);
         break;
-        case 'create:activity': case 'create:a':
+        case 'create:validator': case 'create:vldt':
+            create_validator($argv_length,$argv,$general_path);
+        break;
+        case 'create:activity': case 'create:ac':
             create_activity($argv_length,$argv,$general_path);
         break;
         case 'create:class':
@@ -62,7 +68,7 @@ function route_cli_commands($argc, $argv,$general_path)
             make_model($argv,$general_path);
         break;
         default:
-          echo PHP_EOL.">> fly-env: $argv[0]: command not found".PHP_EOL.PHP_EOL;
+          echo PHP_EOL.">> fly-env: $command_name: command not found".PHP_EOL.PHP_EOL;
         break;
     }
 }

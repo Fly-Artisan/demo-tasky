@@ -16,9 +16,12 @@ class FML {
             $this->transpile_full_tags();
         }
         while(FMLTranslator::rotationFound());
+ 
+       
         $this->cleanFML();
         $this->clearUninitilizedProps();
         $this->processFMLEntities();
+        
     }
 
     private function transpile_full_tags()

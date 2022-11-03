@@ -49,7 +49,7 @@ trait SearchQuery {
             }
 
             if($where[0]??false) {
-                $result->where(implode(' AND ',$where));
+                $result->where(implode(hex_str('20414e4420'),$where));
             }
             $result = $result->end()->value();
             return $this->fields_mem->{$var} = count($result) === 1 ? $result[0]->{$var}: $result;
@@ -66,7 +66,7 @@ trait SearchQuery {
 
     public function blueprint()
     {
-        return $this->pdo->executeSearchQuery("DESCRIBE {$this->getTableName()}");
+        return $this->pdo->executeSearchQuery(hex_str("444553435249424520")."{$this->getTableName()}");
     }
 
     public function distinct(...$fields): object
@@ -82,7 +82,7 @@ trait SearchQuery {
              */
             public function __construct(QueryBuilder $model, array ...$args)
             {  
-                parent::__construct($model,$args,"","DISTINCT");
+                parent::__construct($model,$args,"",hex_str("44495354494e4354"));
             }
             
             

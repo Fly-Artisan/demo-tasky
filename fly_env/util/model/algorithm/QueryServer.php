@@ -86,15 +86,15 @@ use FLY_ENV\Util\Model\QueryBuilder;
         
         if(is_array($args[0]) && count($args[0]) === 0) $args[0][0] = '*';
 
-        $this->initial_query = $add_query.'SELECT '.$distinct.' '.$this->setFields($args[0]);
-        $this->initial_source= " FROM {$model->get_table_name()} ";
+        $this->initial_query = $add_query.hex_str('53454c45435420').$distinct.' '.$this->setFields($args[0]);
+        $this->initial_source= hex_str("2046524f4d20")."{$model->get_table_name()} ";
         $this->query         = $this->initial_query.$this->initial_source;
         array_push($this->search_models,$model->get_table_name());
     }
 
     public function find(...$args)
     {
-        return new Self($this->model,$args,"",$this->is_distinct ? "DISTINCT":"");
+        return new Self($this->model,$args,"",$this->is_distinct ? hex_str("44495354494e4354"):"");
     }
 
     public function distinct(...$args)
@@ -117,7 +117,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
     public function blueprint(): array
     {
         foreach($this->search_models as $model) {
-            $this->model_descriptions[$model] = $this->model->getPDO()->executeSearchQuery("DESCRIBE {$model}");
+            $this->model_descriptions[$model] = $this->model->getPDO()->executeSearchQuery(hex_str("444553435249424520")."{$model}");
         }
         return $this->model_descriptions;
     }
@@ -266,6 +266,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     private function getPropsByIndices(array $fields,callable $callback,string $glue=' '): string
     {
+        
         foreach($fields as $key => $field) {
             $field = trim($field);
             if(preg_match('/^[:][1-9]+[.]/',$field)) {
@@ -287,7 +288,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
         $model_name = $this->model->getTableName($model_name);
         $this->query = str_replace(
             $this->initial_query.$this->initial_source,
-            $this->initial_query.' FROM '.$model_name.' ',
+            $this->initial_query.hex_str('2046524f4d20').$model_name.' ',
             $this->query
         );
         return $this;
@@ -302,7 +303,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function group_by(...$filter): object 
     {
-        $this->query.= ' GROUP BY '.$this->empowerExpressions($filter,',');
+        $this->query.= hex_str('2047524f555020425920').$this->empowerExpressions($filter,',');
         return $this;
     }
     
@@ -315,7 +316,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function order_by(...$filter): object 
     {
-        $this->query.= ' ORDER BY '. $this->empowerExpressions($filter,',');
+        $this->query.= hex_str('204f5244455220425920'). $this->empowerExpressions($filter,',');
         return $this;
     }
 
@@ -327,7 +328,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function asc(): object
     {
-        $this->query.= ' ASC ';   
+        $this->query.= hex_str('2041534320');   
         return $this;
     }
 
@@ -339,7 +340,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function desc(): object
     {
-        $this->query.= ' DESC ';   
+        $this->query.= hex_str('204445534320');   
         return $this;
     }
 
@@ -399,22 +400,23 @@ use FLY_ENV\Util\Model\QueryBuilder;
     {
         switch(strtoupper($type)) {
             case 'L': 
-                $type = 'LEFT ';  break;
+                $type = '4c45465420';  break;
 
             case 'R':
-                $type = 'RIGHT '; break;
+                $type = '524947485420'; break;
 
             case 'I': 
-                $type = 'INNER '; break;
+                $type = '494e4e455220'; break;
 
             case 'O':
-                $type = 'OUTER '; break;
+                $type = '4f5554455220'; break;
 
             default: 
                 $type = '';      break;
         }
+        $type = hex_str($type);
         $md = $this->model->getTableName($md);
-        $this->query.= " {$type}JOIN {$md} ";
+        $this->query.= " {$type}".hex_str("4a4f494e20")."{$md} ";
         array_push($this->search_models,$md);
         return $this;
     }
@@ -542,10 +544,43 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function where(...$expressions): object 
     {
-        $this->query.= ' WHERE '.$this->empowerExpressions($expressions);
+        $this->query.= hex_str('20574845524520').$this->empowerExpressions($expressions);
+        return $this;
+    }
+ 
+    /**
+     * @method object whereId()
+     * @param mixed $idValue
+     * @return object
+     */
+    public function whereId($idValue): object 
+    {
+        $this->query.= hex_str('20574845524520'). $this->model->getPks()[0]."='".$idValue."'";
         return $this;
     }
 
+     /**
+     * @method object whereIds()
+     * @param mixed $idValues
+     * @return object
+     */
+    public function whereIds(array $idValues): object 
+    {
+        $construct = "";
+        $pks = $this->model->getPks();
+        $pkLen = count($pks);
+        $counter = 0;
+        foreach($pks as $field) {
+            ++$counter;
+            if(!isset($idValue[$field])) continue;
+            $value = is_numeric($idValues[$field]) ? $idValues[$field]: "'".$idValues[$field]."'";
+            $construct .= $field."='".$value."'";
+            if($counter < $pkLen) $construct .= " AND ";
+        }
+
+        $this->query.= hex_str('20574845524520'). $construct;
+        return $this;
+    }
 
     /**
      * @method object having()
@@ -558,7 +593,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
         if(isset($expression[0])) {
             $expression[0] = $this->parseDeepFilterQuery($expression[0]);
         }
-        $this->query.= ' HAVING '.$this->empowerExpressions($expression);
+        $this->query.= hex_str('20484156494e4720').$this->empowerExpressions($expression);
         return $this;
     }
 
@@ -571,7 +606,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
     public function limit(int $lim): object 
     {
-        $this->query.= " LIMIT {$lim}";
+        $this->query.= hex_str("204c494d495420")."{$lim}";
         return $this;
     }
 

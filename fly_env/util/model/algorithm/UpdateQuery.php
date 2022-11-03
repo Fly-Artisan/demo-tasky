@@ -29,7 +29,7 @@ trait UpdateQuery {
             $where .= "{$pkname}='{$data_fields[$pkname]}'";
             if($count++ < $numOfPks) { 
                if(array_key_exists($this->pk_names[$key+1],$data_fields)) {
-                  $where.=",";
+                  $where.=hex_str("20414e4420");
                }
             }
             else $count = 1;
@@ -57,13 +57,13 @@ trait UpdateQuery {
          public function __construct(QueryBuilder $model,array $set_fields)
          {      
             $this->model = $model;
-            $this->query = "UPDATE {$model->get_table_name()} SET ";
+            $this->query = hex_str("55504441544520")."{$model->get_table_name()}".hex_str("2053455420");
             $this->query.= $model->find()->interpretExpress(...$set_fields);
          }
 
          public function where(...$expressions)
          {
-            $this->query.=" WHERE ".$this->model->find()->interpretExpress(...$expressions);
+            $this->query.=hex_str("20574845524520").$this->model->find()->interpretExpress(...$expressions);
             return $this;
          }
 

@@ -51,6 +51,7 @@ final class Router extends AuthUrl {
    {
       self::$active_router = new Self($post_routers, $host_dir);
       if(self::$active_router->has_valid_route()) {
+          View::set_request_body();
          if(View::csrf_token_valid())
             self::set_pipe($get_routers,$post_routers)->direct_post_packets();
       } else

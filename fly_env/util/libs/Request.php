@@ -12,6 +12,28 @@ class Request {
 
     private static $has_error = FALSE;
 
+    private static $inst = null;
+
+    public function __construct()
+    {
+        self::$inst = $this;   
+    }
+
+    static public function keyToUpperCase() 
+    {
+        $requestKeys = array_keys($_REQUEST);
+        foreach ($requestKeys as $key) {
+            $_REQUEST[strtoupper($key)] = $_REQUEST[$key]; 
+            if(strtoupper($key) <> $key) unset($_REQUEST[$key]);
+        }
+        return self::class;
+    }
+
+    static public function instance()
+    {
+        return self::$inst == null ? new Request(): self::$inst;
+    }
+
     static public function set_error($flag)
     {
         self::$has_error = $flag;
@@ -89,16 +111,30 @@ class Request {
 
     static public function get($requestKey)
     {
+        $requestKey = isset($_REQUEST[$requestKey]) 
+            ? $requestKey : 
+            (isset($_REQUEST[strtoupper($requestKey)]) ? strtoupper($requestKey) : strtolower($requestKey));
         return trim(htmlentities($_REQUEST[trim($requestKey)],ENT_QUOTES));
+    }
+
+    static public function set($requestKey, $requestValue) 
+    {
+        $_REQUEST[$requestKey] = $requestValue;
     }
 
     static public function add($requestKey, $requestValue)
     {
+        $requestKey = isset($_REQUEST[$requestKey]) 
+            ? $requestKey : 
+            (isset($_REQUEST[strtoupper($requestKey)]) ? strtoupper($requestKey) : strtolower($requestKey));
         $_REQUEST[$requestKey] = $requestValue;
     }
 
     static public function remove($requestKey)
     {
+        $requestKey = isset($_REQUEST[$requestKey]) 
+            ? $requestKey : 
+            (isset($_REQUEST[strtoupper($requestKey)]) ? strtoupper($requestKey) : strtolower($requestKey));
         self::set_request_method();
         if(self::$request_method === 'post') {
             $_POST[$requestKey] = null;
@@ -125,7 +161,7 @@ class Request {
     {
         $value = $_REQUEST[$currentKey];
         self::remove($currentKey);
-        self::add($newKey,$value);
+        self::set($newKey,$value);
     }
 
     static public function is_empty(): bool

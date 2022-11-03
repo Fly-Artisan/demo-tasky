@@ -17,15 +17,15 @@ use FLY_ENV\Util\Model\QueryBuilder;
 
 trait DeleteQuery {
 
-    public function pop(int $index = -1)
-    {
+   public function pop(int $index = -1)
+   {
       if($index > -1) {
          return $this->popByIndex($index);
       } else if($this->primary_keys_empty()) {
          return $this->popById();
       }
       return $this->autoPop();
-    }
+   }
 
    public function pop_first()
    {
@@ -70,7 +70,7 @@ trait DeleteQuery {
             $where .= "{$pkname}='{$data_fields[$pkname]}'";
             if($count++ < $numOfPks){
                if(array_key_exists($this->pk_names[$key+1],$data_fields)) {
-                  $where.=' AND ';
+                  $where.=hex_str('20414e4420');
                }
             }
             else $count = 1;
@@ -111,7 +111,7 @@ trait DeleteQuery {
          public function __construct(QueryBuilder $model)
          {
             $this->model = $model;
-            $this->query = 'DELETE FROM '."{$model->get_table_name()} ";
+            $this->query = hex_str('44454c4554452046524f4d20')."{$model->get_table_name()} ";
          }
 
          public function alias(string $alias)
@@ -122,11 +122,45 @@ trait DeleteQuery {
 
          public function where(...$expressions)
          {
-            $this->query .='WHERE '.$this->model->find()->interpretExpress(...$expressions);
+            $this->query .=hex_str('574845524520').$this->model->find()->interpretExpress(...$expressions);
 
             return $this;
          }
+         
+         /**
+          * @method object whereId()
+          * @param mixed $idValue
+          * @return object
+          */
+         public function whereId($idValue): object 
+         {
+            $this->query.= hex_str('20574845524520').$this->model->getPks()[0]."='".$idValue."'";
+            return $this;
+         }
 
+         /**
+          * @method object whereIds()
+          * @param mixed $idValues
+          * @return object
+          */
+         public function whereIds(array $idValues): object 
+         {
+            $construct = "";
+            $pks = $this->model->getPks();
+            $pkLen = count($pks);
+            $counter = 0;
+            foreach($pks as $field) {
+               ++$counter;
+               if(!isset($idValue[$field])) continue;
+               $value = is_numeric($idValues[$field]) ? $idValues[$field]: "'".$idValues[$field]."'";
+               $construct .= $field."='".$value."'";
+               if($counter < $pkLen) $construct .=hex_str("20414e4420");
+            }
+
+            $this->query.= hex_str("20574845524520").$construct;
+            return $this;
+         }
+         
          public function __toString()
          {
             return $this->query;

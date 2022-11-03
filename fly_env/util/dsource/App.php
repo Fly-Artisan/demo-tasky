@@ -40,6 +40,8 @@ final class App {
 
     private static $root_file = "";
 
+    private static $has_sse = false;
+
     public function __construct($app_detail, $app_configs, array $get_routers, array $post_routers)
     {
         $this->set_fields($app_detail, $app_configs, $get_routers, $post_routers);
@@ -86,6 +88,11 @@ final class App {
     private function enforce_https()
     {
         if(isset(self::$app_configs->security)) {
+            if(isset(self::$app_configs->security->{'sse'})) {
+                if(self::$app_configs->security->{'sse'} === true) {
+                    self::$has_sse = true;
+                }                
+            }
             if(isset(self::$app_configs->security->{'ssl'})) {
                 if(self::$app_configs->security->{'ssl'} === true) {                
                     $using_ssl = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' || $_SERVER['SERVER_PORT'] == 443;
@@ -153,6 +160,8 @@ final class App {
         }
     }
 
+    public static function has_sse() { return self::$has_sse; }
+
     public static function host_directory() { return self::$host_dir; }
 
     public static function http_referer() { return self::$http_referer; }
@@ -198,5 +207,15 @@ final class App {
     public static function set_page_404_path($error_file_path)
     {
         self::$page_404 = $error_file_path;
+    }
+
+    public static function cancel_sse()
+    {
+        self::$has_sse = false;
+    }
+
+    public static function activate_sse()
+    {
+        self::$has_sse = true;
     }
 }

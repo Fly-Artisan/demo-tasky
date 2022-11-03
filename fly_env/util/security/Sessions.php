@@ -62,6 +62,11 @@ class Sessions
        return self::$sessionId;
    }
 
+   public static function view()
+   {
+    return $_SESSION;
+   }
+
    public static function get($key)
    {
        return $_SESSION[$key];

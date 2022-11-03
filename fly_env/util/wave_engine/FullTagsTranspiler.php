@@ -30,11 +30,19 @@ class FullTagsTranspiler extends FMLTranslator {
     protected function findMatch(): array
     {   
         static::$match_found = preg_match(Pattern::getCurlyFullTagMatch(),$this->content, $match);
+        if(!static::$match_found) {
+            static::$match_found = preg_match(Pattern::getShallowCurlyFullTagMatch(),$this->content, $match);
+        }
+        if(!static::$match_found) {
+            static::$match_found = preg_match(Pattern::nonAttributesCurlyFullTagMatch(),$this->content, $match);
+        }
         if(!static::$match_found && $this->fml_activated) {
             static::$match_found = preg_match(Pattern::getQuoteFullTagMatch(),$this->content,$match);
             $this->quotedAttrTag = static::$match_found;
         }
         self::$hasAttributes = isset($match[2]);
+      
+        
         return $match;
     }
 

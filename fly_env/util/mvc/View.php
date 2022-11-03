@@ -4,6 +4,7 @@ use FLY_ENV\Util\Routers\Pipe;
 use FLY_ENV\Util\Wave_Engine\Wave;
 use FLY\DSource\App;
 use FLY\DOM\{Widget,Build};
+use FLY\Libs\Restmodels\Dto;
 use FLY\Security\Sessions;
 
 class View {
@@ -89,11 +90,28 @@ class View {
         self::$context = $view_payload;
     }
 
-    public function execute_post_get_request()
+    public function execute_post_get_request($response = null)
     {
-        if(isset(self::$controller_payload) && is_array(self::$controller_payload)) {
+        if(App::has_sse()) {
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            if(is_array($response)) {
+                echo "data: ".json_encode($response)."\n\n";
+            } else {
+                echo "data: ".$response."\n\n";
+            }
+            flush();
+        } else if((is_string($response) || is_numeric($response) || $response === null) && is_empty(self::$controller_payload)) {
+            echo $response;
+        } else if(!is_empty(self::$controller_payload) && !is_empty($response)) {
+            array_push(self::$controller_payload,$response);
+            echo json_encode(self::$controller_payload);
+        } else if(!is_empty($response)) {
+            echo json_encode($response);
+        } else if(isset(self::$controller_payload) && is_array(self::$controller_payload) && !is_empty(self::$controller_payload)) {
             echo json_encode(self::$controller_payload);
         }
+        
     }
 
     private function show($view_payload,$input)
@@ -199,14 +217,57 @@ class View {
                 );
             $token_valid = (
                 $_POST && isset($_POST['csrf_token'])                   &&
+                isset($_SESSION['csrf_token'])                          &&
                 is_array($_SESSION['csrf_token'])                       &&
                 in_array($_POST['csrf_token'], $_SESSION['csrf_token'])
             ) || ($IN_MODE && App::api_mode());
 
             if(!$token_valid)
-               throw new \Exception(json_encode(['state' => false, 'payload' => 'Invalid request: CSRF token not specified']));
+               throw new \Exception(json_encode(new Dto($state=false,$message='Invalid request: CSRF token not specified',$payload=null,$responseCode='X_TOKEN_NXT')));
         }
         return $token_valid;
+    }
+
+    public static function set_request_body() 
+    {
+        $body = file_get_contents('php://input');
+        if($_SERVER['REQUEST_METHOD'] && !is_empty($body)) {
+            switch($_SERVER['REQUEST_METHOD']) {
+                case 'POST':
+                    $jsonBody = json_decode($body); 
+                    $prevBody = $_POST;
+                    if($jsonBody <> null) {
+                        $_POST    = (array) $jsonBody;
+                        $_REQUEST = (array) $jsonBody;
+                        foreach($prevBody as $key => $value) {
+                            $_POST[$key]    = $value;
+                            $_REQUEST[$key] = $value;
+                        }
+                    }
+                break;
+                case 'GET':
+                    $jsonBody = json_decode($body); 
+                    $prevBody = $_GET;
+                    if($jsonBody <> null) {
+                        $_GET     = (array) $jsonBody;
+                        $_REQUEST = (array) $jsonBody;
+                        foreach($prevBody as $key => $value) {
+                            $_GET[$key]     = $value;
+                            $_REQUEST[$key] = $value;                        }
+                        }
+                break;
+                default:
+                    $jsonBody = json_decode($body); 
+                    $prevBody = $_REQUEST;
+                    if($jsonBody <> null) {
+                        $_REQUEST = (array) $jsonBody;
+                        foreach($prevBody as $key => $value) {
+                            $_REQUEST[$key] = $value;
+                        }
+                    }
+                break;
+            }
+        }
     }
 
     private function showFML(Widget $dom) 

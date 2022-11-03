@@ -53,14 +53,14 @@ function create_widget($argv_length,$argv,$general_path)
     }
 }
 
-function create_activity($argv_length,$argv,$general_path)
+function create_validator($argv_length,$argv,$general_path)
 {
     try {
         if($argv_length === 2) {
-            CVA_Gen::createActivity($argv[0],$general_path);
-            echo PHP_EOL."# Activity of '$argv[0]' was successfully Created.".PHP_EOL;
-            echo "- Activity Name: ".CVA_Gen::activityName().PHP_EOL.PHP_EOL;
-        } else throw new Exception(">> fly-env: create:activity or create:a -> command expects activity name.\nHINT: create:activity [ACTIVITY NAME HERE] or create:a [ACTIVITY NAME HERE]");
+            CVA_Gen::createValidator($argv[0],$general_path);
+            echo PHP_EOL."# Validator of '$argv[0]' was successfully Created.".PHP_EOL;
+            echo "- Validator Name: ".CVA_Gen::validatorName().PHP_EOL.PHP_EOL;
+        } else throw new Exception(">> fly-env: create:validator or create:vldt -> command expects activity name.\nHINT: create:activity [VALIIDATOR NAME HERE] or create:a [VALIDATOR NAME HERE]");
     } catch(Exception $err) {
         echo PHP_EOL.$err->getMessage().PHP_EOL.PHP_EOL;
     }
@@ -74,6 +74,25 @@ function create_class($argv_length,$argv,$general_path)
             echo PHP_EOL."# Class of '$argv[0]' was successfully Created.".PHP_EOL;
             echo "- Class Name: ".CVA_Gen::actionClassName().PHP_EOL.PHP_EOL;
         } else throw new Exception(">> fly-env: create:class -> command expects class name. HINT: create:class [CLASS NAME HERE]");
+    } catch(Exception $err) {
+        echo PHP_EOL.$err->getMessage().PHP_EOL.PHP_EOL;
+    }
+}
+
+function create_activity($argv_length,$argv,$general_path)
+{
+    try {
+        
+        if($argv_length === 2) {
+            $explode = explode('@',$argv[0]);
+            if(count($explode) === 3 && !empty($explode[0]) && !empty($explode[1]) && !is_numeric($explode[0]) && !is_numeric($explode[1])) {
+                ActivityGen::set($general_path.'app/actors',trim($explode[0]),trim($explode[1]), trim($explode[2]))->generateActivity();
+                CVA_Gen::createValidator($explode[0],$general_path);
+                echo PHP_EOL."# Activity of '$argv[0]' was successfully Created.".PHP_EOL;
+                echo "- Activity Name: ".$explode[0].''.PHP_EOL.PHP_EOL;
+            } else throw new Exception(">> fly-env: create:activity or create:a -> command expects activity name.\nHINT: create:activity [ACTIVITY NAME HERE]@[MODEL NAME HERE]@[DATABASE NAME HERE]  or create:a [ACTIVITY NAME HERE]@[MODEL NAME HERE]@[DATABASE NAME HERE]");
+                
+        } else throw new Exception(">> fly-env: create:activity or create:a -> command expects activity name.\nHINT: create:activity [ACTIVITY NAME HERE]@[MODEL NAME HERE]@[DATABASE NAME HERE] or create:a [ACTIVITY NAME HERE]@[MODEL NAME HERE]@[DATABASE NAME HERE]");
     } catch(Exception $err) {
         echo PHP_EOL.$err->getMessage().PHP_EOL.PHP_EOL;
     }

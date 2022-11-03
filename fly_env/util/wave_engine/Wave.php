@@ -26,6 +26,11 @@ class Wave {
 
     public function interpret()
     {    
+        $this->getTranslation();
+    }
+
+    private function getTranslation()
+    {
         $this->express_csrf();
         $translate = (new FML($this->content,$this->fml_mode));
         $this->content = $translate->listen();

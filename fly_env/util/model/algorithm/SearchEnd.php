@@ -225,7 +225,7 @@ trait SearchEnd {
 
             public function last_record(): object 
             {
-                return end($this->result);
+                return !empty($this->result) ? end($this->result): (object) [] ;
             }
 
             public function is_empty(): bool 
@@ -317,7 +317,7 @@ trait SearchEnd {
                 return $this->reset()->blueprint();
             }
 
-            private function blueprintSearch(string $searchType='Type',string $field_name,$callback) 
+            private function blueprintSearch(string $searchType,string $field_name,$callback) 
             {
                 $blueprints = $this->reset()->blueprint();
                 $explode    = explode('.',$this->self->getModelByIndex($field_name));

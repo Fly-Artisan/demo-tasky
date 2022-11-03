@@ -15,20 +15,20 @@ class ExpTranslator {
 
     public function translate()
     {
-        while(preg_match(Pattern::templateVarExpPattern(),$this->content)) 
-        {
-            $this->content = preg_replace(
-                Pattern::templateVarExpPattern(),
-                Pattern::syntaxTemplateVar(),
-                $this->content
-            );
-        }
-
         while(preg_match(Pattern::templateExpPattern(),$this->content)) 
         {
             $this->content = preg_replace(
                 Pattern::templateExpPattern(),
                 Pattern::syntaxTemplateExp(),
+                $this->content
+            );
+        }
+
+        while(preg_match(Pattern::templateVarExpPattern(),$this->content)) 
+        {
+            $this->content = preg_replace(
+                Pattern::templateVarExpPattern(),
+                Pattern::syntaxTemplateVar(),
                 $this->content
             );
         }

@@ -44,6 +44,7 @@ class SQLCreateModel {
             die("Connection failed: " . $conn->connect_error);
         }
         // Create database
+        
         if(!$this->database_exist($conn)) {
             $sql = "CREATE DATABASE IF NOT EXISTS ".$this->database_name;
             if ($conn->query($sql) === TRUE) {
@@ -61,7 +62,10 @@ class SQLCreateModel {
     {
         $query  = "USE ".$this->database_name;
         $this->database_exist = false;
-       if($conn->query($query) === true) $this->database_exist = true;
+        try {
+            if($conn->query($query) === true) $this->database_exist = true;
+        } catch(Exception $ex) {}
+      
         return $this->database_exist;
     }
 
@@ -157,7 +161,7 @@ class SQLCreateModel {
         if(!$this->table_exists() && $this->query <> "") { 
             $this->runQuery(
                 '- Table '.$this->tableName.' created successfully',
-                "Error creating table: ".$this->tableName.$this->sqli->error
+                "Error creating table: ".$this->tableName.' '.$this->sqli->error
             );
         } 
     }
@@ -219,7 +223,12 @@ class SQLCreateModel {
 
     private function modelObjectExists($query)
     {
-        return $this->sqli->query($query) === false ? false : true; 
+        $flag = false;
+        try {
+            $flag = $this->sqli->query($query);
+            $flag = $flag && true;
+        } catch(Exception $ex) {}
+        return $flag; 
     }
 
     private function testQuery($query)
@@ -287,7 +296,7 @@ class SQLCreateModel {
 
     private function constructIQuery(string $tableName,array $insertFields,array $insertValues)
     {
-        $query = "";
+        $query = "";        
         $payload = array_combine($insertFields,$insertValues);
         $counter = 1;
         if(!is_bool($payload)) {

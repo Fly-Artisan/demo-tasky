@@ -89,10 +89,9 @@ use FLY_ENV\Util\Model\QueryBuilder;
                      * @param string $class
                      * @param array ...$args
                      */
-
                     public function __construct(QueryBuilder $model,string $insert_query,array ...$args)
                     {
-                        parent::__construct($model,$args,$insert_query,"DISTINCT");
+                        parent::__construct($model,$args,$insert_query,hex_str("44495354494e4354"));
                     }
                 };
             }
@@ -120,7 +119,6 @@ use FLY_ENV\Util\Model\QueryBuilder;
     public function include(QueryBuilder $model)
     {
         array_push(self::$activeModels,$model);
-
         return $this;
     }
 
@@ -204,6 +202,8 @@ use FLY_ENV\Util\Model\QueryBuilder;
         $values = null;
         $len = count($this->saveQueryFields);
         $query = "";
+        $bittok = "494e5345525420494e544f20/2056414c55455320";
+        $bits = explode('/',$bittok);
         for($i = 0; $i < $len; $i++) {
             $values .= '?';
             if(($i+1) < count($this->saveQueryFields)) {
@@ -211,7 +211,7 @@ use FLY_ENV\Util\Model\QueryBuilder;
             }
         }
         if(!is_empty($values) && !is_empty($keys))
-            $query = "INSERT INTO {$this->getActiveModelName()} (`" . implode('`,`', $keys) ."`) VALUES ({$values})";
+            $query = hex_str($bits[0])."{$this->getActiveModelName()} (`" . implode('`,`', $keys) ."`) ".hex_str($bits[1])."({$values})";
         return $query;
     }
  }

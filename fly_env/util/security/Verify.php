@@ -89,7 +89,7 @@ class Verify {
     {
         $cleanNumber = self::cleanData($number);
         $cleanNumber = filter_var((int) $cleanNumber, FILTER_SANITIZE_NUMBER_INT);
-        self::$flag = filter_var($cleanNumber, FILTER_VALIDATE_INT);
+        self::$flag  = filter_var($cleanNumber, FILTER_VALIDATE_INT);
         
         if(self::$flag) {
             $numberHasPlus = strpos($number,'+'); 

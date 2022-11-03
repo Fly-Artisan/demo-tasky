@@ -7,10 +7,15 @@
 
 namespace FLY_ENV\Util\Model;
 
+use ArrayAccess;
+use Countable;
+use Error;
 use Exception;
+use FLY\Libs\Request;
 use FLY\Model\Algorithm\{
     Config,
     DeleteQuery,
+    IndexQueryParser,
     SaveQuery,
     SearchQuery,
     UpdateQuery
@@ -22,8 +27,17 @@ use FLY\Model\SQLPDOEngine;
  * @todo   Organizes model fields
  */
 
-abstract class QueryBuilder extends Config {
+abstract class QueryBuilder extends Config implements ArrayAccess, Countable {
 
+    /**
+	 * @todo Stores table data in memory
+	 */
+	private array $dataList = [];
+
+    /**
+     * @todo Store pk map
+     */
+    private array $pkMap    = []; 
     /** 
      * @var array|null $methods
      * @todo Allocates memory for custom methods
@@ -251,6 +265,333 @@ abstract class QueryBuilder extends Config {
     }
 
 
+    /**
+     * @return array
+     */
+	public function toArray(): array 
+	{
+        $this->loadList();
+
+		return $this->dataList;
+	}
+
+
+    /**
+     * @param integer $offset
+     * @return void
+     */
+    public function commit(int $offset)
+    {
+        if(isset($this->dataList[$offset])) {
+            return self::make_auto_update((array)$this->dataList[$offset],$this);
+        }
+        return false;
+    }
+
+
+    /**
+     * @param int $offset
+     * @param object|array $value
+     * @return void
+     */
+	public function offsetSet($offset, $value) 
+	{
+        $offsetIsAcceptableString = in_array($offset,['save','update']);
+        if(is_int($offset) || $offsetIsAcceptableString) {
+            $this->loadList();
+            if(is_int($offset)) $this->setPkMap($offset);
+        }
+
+        if (is_null($offset) || ($offsetIsAcceptableString && $offset == 'save')) {
+            $value = (array) $value;
+            if(!$this->recordExists($value) && ($this->recordHasValidIds($value) || (is_null($offset)) && $this->pkIsAutoIncrement())) {
+                if(!($offsetIsAcceptableString && $offset == 'save') && $value instanceof QueryBuilder) {
+                    self::make_auto_append($value->get_table_name(), $this);
+                } else {
+                    self::make_auto_save($value,$this);
+                }
+                $this->loadList();
+            }
+        } else if(isset($this->dataList[$offset]) || ($offsetIsAcceptableString && $offset == 'update')) {
+            if(is_int($offset)) {
+                $this->dataList[$offset] = array_merge($this->pkMap,(array)$value);
+                self::make_auto_update((array)$this->dataList[$offset],$this);
+            } else self::make_auto_update((array)$value,$this);
+            $this->loadList();
+        } else if(preg_match(IndexQueryParser::getMultiPattern(),$offset)) {
+            $this->updateByQueryIndex($offset,$value);
+        } else if(!isset($this->dataList[$offset])) throw new Error("Undefined index $offset");
+    }
+
+
+    /**
+     * @param int $offset
+     * @return bool
+     */
+    public function offsetExists($offset) 
+	{
+		if(is_int($offset)) $this->loadList();
+        return isset($this->dataList[$offset]);
+    }
+
+
+    /**
+     * @param int $offset
+     * @return void
+     */
+    public function offsetUnset($offset) 
+	{
+		if(is_int($offset)) $this->loadList();
+		if(isset($this->dataList[$offset])) {
+		    self::_delete_when((object) $this->dataList[$offset],$this);
+            unset($this->dataList[$offset]);
+        } else if(preg_match(IndexQueryParser::getDeletePattern(),$offset)) {
+            $qio = new IndexQueryParser;
+            $qio = $qio->interpretDelete($offset);
+            if($qio <> null && $qio->hasFields() && !is_empty($qio->getFields()) && trim($qio->getFields()) === '*') {
+                $self = $this->delete();
+                if($qio->hasSearch()) {
+                    $self = $self->where($qio->getSearch());
+                }
+                if($self->end()->value()) $this->loadList();
+            }
+        }
+    }
+
+
+    /**
+     * @param int $offset
+     * @return object
+     */
+    public function offsetGet($offset) 
+	{
+		if(is_int($offset)) {
+            $this->loadList();
+            $this->setPkMap($offset);
+        }
+        $patternString = null;
+        if(preg_match(IndexQueryParser::getMultiPattern(),$offset)) {
+            $patternString = $offset;
+            $offset        = 'ismulpattern';
+        } else if(preg_match(IndexQueryParser::getSinglePattern(),$offset)) {
+            $patternString = $offset;
+            $offset        = 'issgpattern';
+        }
+       // var_dump($match);
+        return match($offset) {
+            'save'                               => (function(){$res = null; $value = Request::all(); if(!$this->recordExists($value)) {$res = self::make_auto_save($value,$this); $this->loadList();} return $res;})(),
+            'update'                             => (function(){$res = self::make_auto_update(Request::all(),$this); $this->loadList(); return $res;})(),
+            'ismulpattern'                       => $this->getMultiDataByQueryIndex($patternString),
+            'issgpattern'                        => $this->getSingleDataByQueryIndex($patternString),
+            is_null($offset) && !is_int($offset) => $this,
+            default                              => isset($this->dataList[$offset]) ? $this->dataList[$offset] : null 
+        };
+		
+    }
+
+
+    /**
+     * @return int
+     */
+    public function count() 
+    {
+        return $this['$[count(*)]'];
+    }
+
+
+    /**
+     * @param string $index_query
+     * @param [type] $value
+     * @return void
+     */
+    private function updateByQueryIndex(string $index_query, $value)
+    {
+        $qio = new IndexQueryParser;
+        $qio = $qio->interpretUpdate($index_query);
+        if($qio <> null && $qio->hasFields()) {
+            $fieldstr = trim($qio->getFields());
+            $self     = $this;
+            if($fieldstr <> '*' && !is_empty($fieldstr)) {
+                $fields = explode(',',$fieldstr);
+                if(!is_array($value) && !is_object($value) && !in_array(trim($fields[0]),$this->getPks())) {
+                    $self = $self->set("{$fields[0]}='$value'");
+                } else if(is_array($value)) {
+                    $isFields = false;
+                    $setup = '';
+                    foreach($fields as $key => $name) {
+
+                        if(!isset($value[$key]) || in_array(trim($name),$this->getPks())) continue;
+
+                        if($isFields === false) {
+                            $setup .= "{$name}='$value[$key]'";
+                            $isFields = count($fields) > 1;
+                        } else {
+                            $setup .= ",{$name}='$value[$key]'";
+                        }
+                    }
+                    if(!is_empty($setup)) $self = $self->set($setup);
+                    else $self = null;
+                }
+            } else if(is_array($value) || is_object($value)) {
+                $isFields = false;
+                $setup = '';
+                $mdf = $this->get_active_model_fields();
+                foreach($value as $fd => $val) {
+                    if(in_array(trim($fd),$this->getPks()) || !in_array(trim($fd),$mdf)) continue;
+                    if(preg_match('/[_a-zA-Z][_a-zA-Z0-9]*/',$fd)) {
+                        if($isFields === false) {
+                            $setup .= "{$fd}='$val'";
+                            $isFields = count($value) > 1;
+                        } else {
+                            $setup .= ",{$fd}='$val'";
+                        }
+                    }
+                }
+                if(!is_empty($setup)) $self = $self->set($setup);
+                else $self = null;
+            }
+            if($qio->hasSearch() && !is_empty($qio->getSearch()) && $self <> null) {
+                $self = $self->where(preg_replace('/\s+([a-zA-Z_][a-zA-Z0-9_]*\s*[=])\s*([0-9]*)\s+/ixm',' $1\'$2\' ',' '.$qio->getSearch().' '));
+            }
+            if($self <> null) $self->end();
+
+        }
+    }
+
+
+    /**
+     * @param string|null $index_query
+     * @return array|null
+     */
+    private function getMultiDataByQueryIndex(?string $index_query)
+    {
+        if($index_query <> null) {
+            $qio = new IndexQueryParser;
+            $qio = $qio->interpret($index_query);
+            if($qio <> null && $qio->hasFields()) {
+                $self = $this->find(...explode(',',$qio->getFields()));
+                if($qio->hasSearch()) {
+                    $self = $self->where($qio->getSearch());
+                }
+                return $self->end()->value(); 
+            }
+        }
+        return null; 
+    }
+
+
+    /**
+     * @param string|null $index_query
+     * @return array|null
+     */
+    private function getSingleDataByQueryIndex(?string $index_query)
+    {
+        if($index_query <> null) {
+            $qio = new IndexQueryParser;
+            $qio = $qio->interpret($index_query);
+            if($qio <> null && $qio->hasFields()) {
+                $self = $this->find(':'.$qio->getFields());
+                if($qio->hasSearch()) {
+                    $self = $self->where($qio->getSearch());
+                }
+                $res  = $self->end()->value();
+                if(!is_empty($res)) {
+                    return $res[0]->{$qio->getFields()};
+                }
+            }
+        }
+        return null; 
+    }
+
+    
+    /**
+     * @param array $record
+     * @return boolean
+     */
+    private function recordHasValidIds(array $record): bool 
+    {
+        $flag = true;
+        $record_keys = array_keys($record);
+        foreach($this->getPks() as $key) {
+            $flag = $flag && in_array($key,$record_keys) && isset($record[$key]) && (!is_empty($record[$key]));
+        }
+        return $flag && count($this->getPks()) > 0;
+    }
+
+
+    /**
+     * @return boolean
+     */
+    private function pkIsAutoIncrement(): bool 
+    {
+        $blueprint = self::_describe($this);
+        if(isset($blueprint[$this->get_table_name()])) {
+            $bp = $blueprint[$this->get_table_name()];
+            foreach($bp as $data) {
+                if(preg_match('/^PRI/i',$data->{'Key'}) && preg_match('/auto_increment/i',$data->{'Extra'})) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * @param array $record
+     * @return boolean
+     */
+    private function recordExists(array $record): bool 
+    {
+        $query = [];
+        $fieldMany = false;
+        foreach($record as $key => $value) {
+            if(in_array($key,$this->getPks())) {
+                if(!$fieldMany) {
+                    $query[":{$key}"] = (object) [
+                        'val' => $value
+                    ];
+                    $fieldMany = count($record) > 1;
+                } else {
+                    array_push($query,'AND');
+                   $query[":{$key}"] = (object) [
+                       'val' => $value
+                   ];
+                }
+            }
+        }
+        return !is_empty($query) && !is_empty($this->find()->where($query)->end()->value());
+    }
+
+
+    /**
+     * @return void
+     */
+    private function loadList() 
+	{
+		$this->dataList = $this['[*]'];
+	}
+
+
+    /**
+     * @param integer $offset
+     * @return void
+     */
+    private function setPkMap(int $offset)
+    {
+        foreach($this->dataList[$offset] as $key => $value) {
+            if(in_array($key,$this->pk_names)) {
+                $this->pkMap = [$key => $this->dataList[$offset]->{$key}];
+                break;
+            }
+        }
+    }
+
+
+    /**
+     * @param array $args
+     * @return void
+     */
     private function cleanProcedureArgs(array &$args)
     {
         foreach($args as $key => $arg) {
@@ -269,7 +610,6 @@ abstract class QueryBuilder extends Config {
      * @return void
      * @todo Set's enlist active model fields
      */
-
     private function setChildClassFields()
     {
         $child_model_vars        = get_class_vars($this->activeModelName);

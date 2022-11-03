@@ -41,7 +41,7 @@ class CVA_Gen {
         return self::$viewName;
     }
 
-    static public function activityName()
+    static public function validatorName()
     {
         return self::$activityName;
     }
@@ -77,7 +77,7 @@ class CVA_Gen {
         self::create($className,$path,'v',true);
     }
 
-    static public function createActivity(string $className, string $path)
+    static public function createValidator(string $className, string $path)
     {
         self::create($className,$path,'act');
     }
@@ -92,6 +92,12 @@ class CVA_Gen {
         $className = preg_replace('%_{2,}%','_',implode('_',explode(' ',$className)));
         new Self($path,explode('/',preg_replace('%\"|\'%','',$className)),$classType,$attachLabel);
         self::createFile($classType);
+    }
+    
+    static public function createKeyDirIfNotExists(string $dirPath)
+    {
+        if(!file_exists($dirPath))
+            mkdir($dirPath);
     }
 
     static private function createDirectories(array $dirNames, string $type)
@@ -108,10 +114,14 @@ class CVA_Gen {
             case 'w': case 'fml':
                 self::$filePath .= 'widget/';
             break;
-            case 'act': case 'cls': default:
-                self::$filePath .= "actors/";
+            case 'act':
+                self::$filePath .= "actors/vdt/";
             break;
+            case 'cls': default:
+                self::$filePath .= "actors/";
         }
+    
+        self::createKeyDirIfNotExists(self::$filePath);
         if($lenOfDirNames > 1) {
             $dirs = "";
             self::$className = array_pop($dirNames);
@@ -138,6 +148,7 @@ class CVA_Gen {
                 : ''
             )
         );
+        if($type === 'act') self::$className = self::$className.'Vdt'; 
         self::$filePath .= self::$className.'.php';
         if($type === 'c') {
             self::$namespace = '<?php namespace App\Controllers'.self::$classDir;
@@ -148,7 +159,7 @@ class CVA_Gen {
             self::saveFile(self::view());
             self::$viewName = self::$className;
         } else if($type === 'act') {
-            self::$namespace = '<?php namespace App\Actors'.self::$classDir;
+            self::$namespace = '<?php namespace App\Actors\VDT'.self::$classDir;
             self::saveFile(self::activity());
             self::$activityName = self::$className;
         } else if($type === 'cls') {
@@ -164,6 +175,7 @@ class CVA_Gen {
 
     static private function saveFile($cmd_text)
     {
+        
         $class_file = fopen(self::$filePath,'w');
         fwrite($class_file,$cmd_text);
         fclose($class_file);
@@ -186,20 +198,11 @@ CLS;
     {
         $activity_name = self::$className;
         $custom_namespace = self::$namespace;
-        $validator = '$this->validator->has_error()';
-        $error_msg = '$this->validator->get_error_message()';
         return <<<ACT
 $custom_namespace;
 use FLY\Libs\{ Validator, Request };
 
-class $activity_name extends Validator {
-
-\tpublic function customizeName()
-\t{
-\t\tif($validator) {
-\t\t\treturn $error_msg;
-\t\t}
-\t}
+class {$activity_name} extends Validator {
 
 \tprotected function error_report():array
 \t{
@@ -208,26 +211,18 @@ class $activity_name extends Validator {
 \t\t];
 \t}
 
-                
-                
+                            
                 
 \t/**
 \t * @param Request \$request
 \t *
-\t * @return $activity_name|__anonymous@408
+\t * @return {$activity_name}|__anonymous@408
 \t *
 \t * @Todo Purposely to execute use cases with optional validations
 \t */
 \tstatic function _(Request \$request)
 \t{
-\t\treturn new class(\$request) extends $activity_name {
-    
-\t\t\tpublic function customizeName()
-\t\t\t{
-\t\t\t\tif($validator) {
-\t\t\t\t\treturn $error_msg;
-\t\t\t\t}
-\t\t\t}
+\t\treturn new class(\$request) extends {$activity_name} {
 
 \t\t\tprotected function error_report():array
 \t\t\t{

@@ -69,7 +69,7 @@ function changeStatus($index,$scope,$http) {
         jsonParse: true,
         send: [{id, status ,csrf_token: token}]
     }).then(({response}) =>{
-        alert(response.payload);
+        alert(response.message);
         fetchTask($scope,$http);
     }).catch(({error}) => console.log(error));
 }
@@ -82,7 +82,7 @@ function addTask($scope,$http) {
         jsonParse: true,
         send: [{name: $scope.name, csrf_token: token}]
     }).then(({response}) =>{
-        alert(response.payload);
+        alert(response.message);
         fetchTask($scope,$http);
     }).catch(({error}) => console.log(error));
 
@@ -96,7 +96,7 @@ function deleteTask($index,$scope,$http) {
         jsonParse: true,
         send: [{taskNum: ($index + 1), csrf_token: token}]
     }).then(({response}) =>{
-        alert(response.payload);
+        alert(response.message);
         fetchTask($scope,$http);
     }).catch(({error}) => console.log(error));
 }
@@ -110,7 +110,7 @@ function updateTask($scope,$http) {
         jsonParse: true,
         send: [{id: $scope.taskID, name: $scope.name, csrf_token: token}]
     }).then(({response}) =>{
-        alert(response.payload);
+        alert(response.message);
         fetchTask($scope,$http);
     }).catch(({error}) => console.log(error));
 }

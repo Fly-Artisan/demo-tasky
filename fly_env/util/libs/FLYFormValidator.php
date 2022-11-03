@@ -1,5 +1,6 @@
 <?php namespace FLY\Libs;
 
+use FLY\Libs\Restmodels\Dto;
 use FLY\Security\Verify;
 use FLY_ENV\Util\Wave_Engine\Pattern;
 
@@ -20,29 +21,38 @@ class FLYFormValidator extends Verify {
         self::$request = $request;
     }
 
-    static public function check(Request $request,array $error_messages = []): FLYFormValidator
+    static public function check(Request $request,array &$error_messages = []): FLYFormValidator
     {
         $validator = new Self($request);
-        self::setRequestTypes(self::$request::all(),$error_messages);
-        $request = self::$request::all();
-        foreach($request as $data_type => $payload) {
-            $data_type = trim($data_type);
-            $payload   = trim($payload);
-            if(
-            (self::strict_validate($data_type,$payload,self::$error_flags) === FALSE ||
-                self::optional_validate($data_type,$payload,self::$error_flags) === FALSE
-            )
-            ) {
+        $error_found = false;
+        foreach($error_messages as $errKey => $errValue) {
+            if($error_found === true) {
                 break;
             }
+            self::setRequestTypes(self::$request::all(),[$errKey => $errValue]);
+            $request = self::$request::all();
+            foreach($request as $data_type => $payload) {
+                if(
+                (self::strict_validate($data_type,$payload,self::$error_flags) === FALSE ||
+                    self::optional_validate($data_type,$payload,self::$error_flags) === FALSE
+                )
+                ) {
+                    $error_found = true;
+                    break;
+                } else {
+                    $error_found = false;
+                }
+            }
         }
-
+        $error_messages = null;
+        unset($error_messages);
         self::$has_error = !empty(self::$error_data);
         self::reset_request();
+
         return $validator;
     }
 
-    static private function setRequestTypes(array $requests, array &$error_messages)
+    static private function setRequestTypes(array $requests, array $error_messages)
     {
         self::setDataFields($error_messages);
         $requestKeys = array_keys($requests);
@@ -54,11 +64,9 @@ class FLYFormValidator extends Verify {
         }
         foreach(self::$data_fields as $field => $data_type) {
             if(!array_key_exists($field,$requests)) {
-                self::$request::add("{$field}:{$data_type}",'');
+                self::$request::set("{$field}:{$data_type}",'');
             }
         }
-        $error_messages = null;
-        unset($error_messages);
     }
 
     static private function sanitizeRequestKeys($currentKeyValue): string
@@ -86,9 +94,9 @@ class FLYFormValidator extends Verify {
         return self::$has_error;
     }
 
-    public function get_error_message(): array
+    public function get_error_message(): Dto
     {
-        return self::$error_data;
+        return new Dto(self::$error_data['state']?? false,self::$error_data['payload']??'',self::$error_data['field_type']??'');
     }
 
     public function get_request(): Request
@@ -113,55 +121,55 @@ class FLYFormValidator extends Verify {
     static private function check_strictly($data_type,$payload)
     {
         $response = true;
-        if(preg_match('%(?:\s*)\:(?:\s*)text%',$data_type)):
+        if(preg_match('%(?:\s*)\:(?:\s*)text%i',$data_type)):
             $response = self::raw_text_valid($payload);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)min\s*[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)min\s*[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::value_is_minimum($payload,$match[1]);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)max\s*[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)max\s*[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::value_is_maximum($payload,$match[1]);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::absolute_length($payload,$match[1]);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)email%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)email%i',$data_type)):
             $response = self::email_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)url%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)url%i',$data_type)):
             $response = self::url_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)ip%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)ip%i',$data_type)):
             $response = self::ip_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)salphaNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)salphaNum%i',$data_type)):
             $response = self::is_strict_alphaNumeric($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)alphaNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)alphaNum%i',$data_type)):
             $response = self::is_alphaNumeric($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)alpha%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)alpha%i',$data_type)):
             $response = self::is_alpha($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)tel%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)tel%i',$data_type)):
             $response = self::is_telNumber($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)unum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)unum%i',$data_type)):
             $response = self::is_unsigned_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)snum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)snum%i',$data_type)):
             $response = self::is_signed_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)natNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)natNum%i',$data_type)):
             $response = self::is_natural_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)num%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)num%i',$data_type)):
             $response = self::is_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)int%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)int%i',$data_type)):
             $response = self::is_int_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)float%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)float%i',$data_type)):
             $response = self::is_float_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)double%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)double%i',$data_type)):
             $response = self::is_double_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)date%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)date%i',$data_type)):
             $response = self::is_date($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)time%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)time%i',$data_type)):
             $response = self::is_time($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)dateTime%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)dateTime%i',$data_type)):
             $response = self::is_datetime($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)bool%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)bool%i',$data_type)):
             $response = self::is_boolean($payload);
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\%([\w\d\s\W\S\D]*)%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\%([\w\d\s\W\S\D]*)%i',$data_type,$match)):
             $response = self::pattern_matched($payload,$match[1]);
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\(((?:[\w\d\s\W\S\D]*?))\)$%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\(((?:[\w\d\s\W\S\D]*?))\)$%i',$data_type,$match)):
             $response = self::enum_is_matched($payload,explode(',',$match[1]));
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\{((?:[\w\d\s\W\S\D]*?))\}$%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)\{((?:[\w\d\s\W\S\D]*?))\}$%i',$data_type,$match)):
             $response = self::compare($payload,explode(',',$match[1]));
         endif;
         return $response;
@@ -170,55 +178,55 @@ class FLYFormValidator extends Verify {
     static private function check_optionally($data_type,$payload)
     {
         $response = true;
-        if(preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)text%',$data_type)):
+        if(preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)text%i',$data_type)):
             $response = self::raw_text_valid($payload);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*min\s*[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*min\s*[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::value_is_minimum($payload,$match[1]);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*max\s*[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*max\s*[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::value_is_maximum($payload,$match[1]);
-        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*[|]\s*([0-9]*)\s*[|]%',$data_type,$match)):
+        elseif(preg_match('%(?:\s*)\:(?:\s*)[?]\s*[|]\s*([0-9]*)\s*[|]%i',$data_type,$match)):
             $response = self::absolute_length($payload,$match[1]);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)email%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)email%i',$data_type)):
             $response = self::email_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)url%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)url%i',$data_type)):
             $response = self::url_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)ip%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)ip%i',$data_type)):
             $response = self::ip_is_valid($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)salphaNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)salphaNum%i',$data_type)):
             $response = self::is_strict_alphaNumeric($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)alphaNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)alphaNum%i',$data_type)):
             $response = self::is_alphaNumeric($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)alpha%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)alpha%i',$data_type)):
             $response = self::is_alpha($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)tel%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)tel%i',$data_type)):
             $response = self::is_telNumber($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)unum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)unum%i',$data_type)):
             $response = self::is_unsigned_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)snum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)snum%i',$data_type)):
             $response = self::is_signed_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)natNum%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)natNum%i',$data_type)):
             $response = self::is_natural_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)num%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)num%i',$data_type)):
             $response = self::is_number($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)int%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)int%i',$data_type)):
             $response = self::is_int_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)float%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)float%i',$data_type)):
             $response = self::is_float_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)double%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)double%i',$data_type)):
             $response = self::is_double_val($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)date%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)date%i',$data_type)):
             $response = self::is_date($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)time%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)time%i',$data_type)):
             $response = self::is_time($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)dateTime%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)dateTime%i',$data_type)):
             $response = self::is_datetime($payload);
-        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)bool%',$data_type)):
+        elseif (preg_match('%(?:\s*)\:(?:\s*)[?](?:\s*)bool%i',$data_type)):
             $response = self::is_boolean($payload);
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\%([\w\d\s\W\S\D]*)%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\%([\w\d\s\W\S\D]*)%i',$data_type,$match)):
             $response = self::pattern_matched($payload,$match[1]);
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\(((?:[\w\d\s\W\S\D]*?))\)$%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\(((?:[\w\d\s\W\S\D]*?))\)$%i',$data_type,$match)):
             $response = self::enum_is_matched($payload,explode(',',$match[1]));
-        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\{((?:[\w\d\s\W\S\D]*?))\}$%',$data_type,$match)):
+        elseif (preg_match('%(?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\{((?:[\w\d\s\W\S\D]*?))\}$%i',$data_type,$match)):
             $response = self::compare($payload,explode(',',$match[1]));
         endif;
         return $response;
@@ -237,12 +245,13 @@ class FLYFormValidator extends Verify {
             self::$error_data = ['state' => false,'field_type' => $data_type];
             self::$request::set_error(true);
         }
+        
     }
 
     static private function set_strict_error($response,$data_type,$payload,$error_messages)
     {
         if($response === TRUE) {
-            Request::add(self::get_data_field($data_type), $payload);
+            Request::set(self::get_data_field($data_type), $payload);
             self::$request::set_error(false);
         } else if(array_key_exists(self::get_data_field_var($data_type),$error_messages) && self::$has_error){
             self::$error_data = ['state' => false,'payload' => $error_messages[self::get_data_field_var($data_type)],'field_type' => $data_type];

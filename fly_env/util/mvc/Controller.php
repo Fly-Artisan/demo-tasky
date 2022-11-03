@@ -1,12 +1,11 @@
 <?php namespace FLY\MVC;
 
 use App\Models\Model_Handles;
+use FLY\Libs\Request;
 
 class Controller {
 
     private static $view;
-
-    private static $model;
     
     private static $mvc_method;
 
@@ -23,8 +22,12 @@ class Controller {
     public function __construct()
     {
         self::$payload = [];
-        if(method_exists($this, 'main')) $this->main();
+        if(method_exists($this, 'main'))   $this->main();
+
+        if(method_exists($this, '__init__')) $this->__init__(Request::instance());
     }
+
+    protected function __init__(Request $request) { /** Overridable Method */ }
 
     public function setView(View $view) 
     {
@@ -54,7 +57,6 @@ class Controller {
 
     final static protected function add_context(array $data)
     {
-
         $keys = array_keys($data);
         
         foreach($keys as $key) {
@@ -79,22 +81,10 @@ class Controller {
 
         return self::$context;
     }
-
-    public function setModel(Model $model)
-    {
-        self::$model = $model;
-    }
     
     public function setMVCMethod($method)
     {
         self::$mvc_method = $method;
-    }
-
-    public function executeModelAndView()
-    {
-        $method = self::$mvc_method;
-        self::$model::$method();
-        self::$view::$method();
     }
     
     public function executeView()

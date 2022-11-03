@@ -33,7 +33,7 @@ class Upload {
        File::set_file($name);
        if(!$this->auth_image_file(File::class)) {
            $result = $this->auth->get_state();
-           if($result['state'] === false) 
+           if($result->{'state'} === false) 
                return $result;
        } 
 
@@ -46,7 +46,7 @@ class Upload {
         File::set_file($name);
         if(!$this->auth_file(File::class,$name)) {
             $result = $this->auth->get_state();
-            if($result['state'] === false) 
+            if($result->{'state'} === false) 
                 return $result;
         } 
         return $this->move_file(File::class);
@@ -62,16 +62,16 @@ class Upload {
         $file::set_temp($file::get_temp());
         $result = $file::move_to(self::$FILE_PATH);
         
-        if($result['state'] === false) {
-            if($result['payload'] === 'file_exists') {
-                return [
+        if($result->{'state'} === false) {
+            if($result->{'message'} === 'file_exists') {
+                return (object)[
                     'state'   => false,
-                    'payload' => 'The file you just submitted already exists'
+                    'message' => 'The file you just submitted already exists'
                 ];
             }
         }
         $this->change_file_name($file);
-        return [
+        return (object)[
             'state'     => true,
             'filename'  => $this->file_new_name
         ];
@@ -105,6 +105,12 @@ class Upload {
         $newname = self::$FILE_PATH.$hashed_name;
         rename($oldname, $newname);
         $this->file_new_name = $hashed_name;
+    }
+
+    public function getFileExtension($name)
+    {
+        File::set_file($name);
+        return strtolower($this->get_file_extension(File::class));
     }
 
     private function get_file_extension($file)

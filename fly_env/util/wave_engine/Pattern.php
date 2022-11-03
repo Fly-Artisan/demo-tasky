@@ -53,6 +53,49 @@ class Pattern {
         %xm';
     }
 
+    static function nonAttributesCurlyFullTagMatch()
+    {
+        $nsp = self::$namespace;
+        return '%
+        (?=<'.$nsp.'[:](?:([a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)))'.
+            '(?:<'.$nsp.'[:](?:[a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)>)     
+                (
+                    (?:[\w\d\s\W\S\D]*?)
+                )                                                         # lazy search tag children
+            </'.$nsp.'[:]\1>                                          
+        %xm';
+    }
+
+    static function getShallowCurlyFullTagMatch()
+    {
+        $nsp = self::$namespace;
+        return '%
+        (?=<'.$nsp.'[:](?:([a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)))'.
+            '(?:<'.$nsp.'[:](?:[a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)
+                (
+                    (?: 
+                        (?:
+                            (?:\s*)(?:[!]?\s*[a-zA-Z_][a-zA-Z0-9_-]*)(?:\s*)               # get attribute key
+                            (?:(?:=)?(?:\s*)
+                                (?:
+                                    (?:
+                                        (?:
+                                            (?:[{])((?:[^{}][}]?)*)(?:[}])
+                                        )
+                                    )
+                                )
+                            )?  # lazy search attribute value
+                        )*(?:\s*) 
+                        | 
+                        (?:[{](?:\s*)[a-zA-Z_][a-zA-Z0-9_,\s]*(?:\s*)[}]))*)?(?:\s*)>
+                )                                               # get end of the starting tag
+                (
+                    (?:[\w\d\s\W\S\D]*?)
+                )                                                         # lazy search tag children
+            </'.$nsp.'[:]\1>                                          
+        %xm';
+    }
+
     static function getCurlyFullTagMatch()
     {
         $nsp = self::$namespace;
@@ -116,6 +159,40 @@ class Pattern {
     {
         return '%
           (?:[{][#])((?:[\w\d\s\W\S\D]*?))(?:[#][}])
+        %xm';
+    }
+
+    static public function nonAttributeCurlyEmptyTagMatch()
+    {
+        $nsp = self::$namespace;
+        return '%
+        (?=<'.$nsp.'[:](?:([a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)))'.
+            '(?:<'.$nsp.'[:](?:[a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)/>)
+        %xm';
+    }
+
+    static public function getShallowCurlyEmptyTagMatch()
+    {
+        $nsp = self::$namespace;
+        return '%
+        (?=<'.$nsp.'[:](?:([a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)))'.
+            '(?:<'.$nsp.'[:](?:[a-zA-Z_][a-zA-Z0-9_.-]*)(?:\s*)
+                ((?: 
+                    (?:
+                        (?:\s*)(?:[!]?\s*[a-zA-Z_][a-zA-Z0-9_-]*)(?:\s*)               # get attribute key
+                        (?:(?:=)?(?:\s*)
+                            (?:
+                                (?:
+                                    (?:
+                                        (?:[{])((?:[^{}][}]?)*)(?:[}])
+                                    )
+                                )
+                            )
+                        )?  # lazy search attribute value
+                    )*(?:\s*) 
+                    | 
+                    (?:[{](?:\s*)[a-zA-Z_][a-zA-Z0-9_,\s]*(?:\s*)[}]))*)?(?:\s*)/>
+            )
         %xm';
     }
 
@@ -183,6 +260,12 @@ class Pattern {
                 )
             )  # lazy search attribute value
         )
+        %xm';
+    }
+
+    static public function findAttributeValue() {
+        return '%
+            (?:[&][&]fmlsqt[;][{](.*)[}])
         %xm';
     }
 
@@ -282,7 +365,7 @@ class Pattern {
                 (?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\{((?:[\w\d\s\W\S\D]*?))\} |
                 (?:\s*)(?:\:)(?:\s*)(?:[?])(?:\s*)\%([\w\d\s\W\S\D]*)
             )
-        %xm';
+        %ixm';
     }
 
     static public function templateVoidFunctionPattern()
@@ -464,12 +547,12 @@ class Pattern {
     {
         $pat = '(?:["\'](?:[\w\W]*?)(?:\!\s*\})?(?:[\w\W]*?)["\'][\w\W\d\D\s\S]*?)?';
         return '%
-        (?=\{\!\s*)
-        (?!\!\})
-        (?:\{\!)\s*
+        (?=[$]\{\~\s*)
+        (?!\~\})
+        (?:[$]\{\~)\s*
         (
             (?:[\w\W\d\D\s\S]*?)'.$pat.'
-        )\s*(?:\!\})
+        )\s*(?:\~\})
         
         %xm';
     }

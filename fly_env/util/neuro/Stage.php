@@ -25,7 +25,7 @@ final class Stage {
     public function __construct(Pipe $pipe)
     {
         $this->pipe = $pipe;
-        $this->stage_context = [];                
+        $this->stage_context = [];           
     }
 
     public function route_post_controller_request()
@@ -62,9 +62,10 @@ final class Stage {
         $this->controller_class = new $controller();
         $this->setParentView();
         $method = $this->pipe->mvc_method();
-        $this->controller_class::$method(new Request); //request params     
+        $response = $this->controller_class::$method(Request::instance()); //request params    
+        
         if(isset($this->view_class) && $this->view_class !== null)
-            $this->view_class->execute_post_get_request();   
+            $this->view_class->execute_post_get_request($response);   
     }
 
     private function setParentView()
@@ -73,14 +74,13 @@ final class Stage {
         $this->view_class->add_pipe($this->pipe); 
     }
 
-
     private function init_route_controller_template_request($controller)
     {
         $this->controller_class = new $controller();
         $method = $this->pipe->mvc_method();
         $this->controller_class->setView($this->view_class);
         $this->controller_class->getView()->add_pipe($this->pipe);
-        $this->controller_class::$method(new Request); //request params
+        $this->controller_class::$method(Request::instance()); //request params
         $this->check_rendering_state($this->controller_class);
     }
 
@@ -93,7 +93,7 @@ final class Stage {
         $this->controller_class->setMVCMethod($method);
         $this->controller_class->getView()->add_pipe($this->pipe);
         if($this->pipe->fml_mode()) {
-            $this->controller_class::$method(new Request); //request params
+            $this->controller_class::$method(Request::instance()); //request params
             $this->fml_class = $this->controller_class->executeView();
             $this->load_context();
             $this->controller_class->setContext($this->stage_context);        
@@ -101,7 +101,7 @@ final class Stage {
             $this->fml_class = $this->controller_class->executeView();
             $this->load_context();
             $this->controller_class->setContext($this->stage_context);        
-            $this->controller_class::$method(new Request); //request params
+            $this->controller_class::$method(Request::instance()); //request params
         }
         $this->check_rendering_state($this->controller_class);
     }
