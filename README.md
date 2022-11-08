@@ -28,7 +28,7 @@ A todo app built with the FLY PHP Artisan Framework
 
 - Change the director to this software's folder.
 
-- Then enter the command 'php fly-env migrate:models'.
+- Then enter the command 'php fly migrate:models'.
 
 - Now you can run the software. 
 
