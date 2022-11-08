@@ -1,3 +1,9 @@
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @class servo
+ * @version 2.0.0
+ */
+
 var servo = /** @class */ (function () {
     function servo() {
         servo.$self.holdsdata = false;

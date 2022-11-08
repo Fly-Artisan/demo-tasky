@@ -1,5 +1,8 @@
 <?php 
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 class ActivityGen {
 
     private string $object_name;

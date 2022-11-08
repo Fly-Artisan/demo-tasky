@@ -2,14 +2,11 @@
 
 use FLY_ENV\Util\Routers\Pipe;
 use FLY\MVC\{ Model, View, Controller };
-
 /**
  * @author K.B Brew <flyartisan@gmail.com>
- * @version 2.0.0
  * @package FLY_ENV\Util\Security
+ * @version 2.0.0
  */
-
-
 class PipeFieldValidator {
     
     private $pipe;

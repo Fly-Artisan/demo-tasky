@@ -3,7 +3,10 @@ use FLY\DSource\App;
 use FLY_ENV\Util\Routers\Pipe;
 use FLY\Security\Sessions;
 use FLY_ENV\Util\Wave_Engine\Pattern;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 function import($url) {
     return require_once FLY_ENV_STATIC_HTMLS_PATH.$url.EXT;
 }

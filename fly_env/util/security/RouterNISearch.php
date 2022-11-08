@@ -1,6 +1,9 @@
 <?php namespace FLY_ENV\Util\Security;
-
-
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @package FLY_ENV\Util\Security
+ * @version 2.0.0
+ */
 trait RouterNISearch {
 
     private function getValidRouteIndex($routers)

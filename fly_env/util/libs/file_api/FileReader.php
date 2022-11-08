@@ -1,5 +1,9 @@
 <?php namespace FLY\Libs\File_API;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs\File_API
+ * @version 2.0.0
+ */
 class FileReader {
     
     private static $fileType;

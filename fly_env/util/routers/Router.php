@@ -4,13 +4,11 @@ use FLY_ENV\Util\Security\AuthUrl;
 use FLY\Routers\Redirect;
 use FLY\DSource\App;
 use FLY\MVC\View;
-
 /**
  * @author K.B Brew <flyartisan@gmail.com>
- * @version 2.0.0
  * @package FLY_ENV\Util\Routers
+ * @version 2.0.0
  */
-
 final class Router extends AuthUrl {
 
    private static $active_router;

@@ -10,10 +10,10 @@
 namespace FLY\Libs\File_API;
 
 use FLY\Security\KeyGen;
-
 /**
- * Description of File
- *
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs\File_API
+ * @version 2.0.0
  */
 class File {
     

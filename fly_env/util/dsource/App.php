@@ -1,13 +1,11 @@
 <?php namespace FLY\DSource;
 
 use FLY_ENV\Util\Routers\Router;
-
 /**
  * @author K.B Brew <flyartisan@gmail.com>
  * @version 2.0.0
  * @package FLY\DSource
  */
-
 final class App {
     
     private static $name;

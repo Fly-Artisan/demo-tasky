@@ -4,7 +4,6 @@
  * @package FLY\Model
  * @version 3.0.0
  */
-
 namespace FLY_ENV\Util\Model;
 
 use ArrayAccess;

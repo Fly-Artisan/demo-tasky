@@ -4,10 +4,9 @@ use FLY\DSource\App;
 
 /**
  * @author K.B Brew <flyartisan@gmail.com>
- * @version 2.0.0
  * @package FLY_ENV\Util\Security
+ * @version 2.0.0
  */
-
  class AuthUrl {
 
     private static $valid_route;

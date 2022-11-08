@@ -7,11 +7,10 @@
  */
 
 namespace FLY\Libs\File_API;
-
 /**
- * Description of UploadImage
- *
- * 
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs\File_API
+ * @version 2.0.0
  */
 class UploadImage extends Upload {
 

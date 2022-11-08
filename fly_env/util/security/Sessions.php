@@ -1,5 +1,9 @@
 <?php namespace FLY\Security;
-
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @package FLY\Security
+ * @version 2.0.0
+ */
 class Sessions 
 {
    private static $sessionId;

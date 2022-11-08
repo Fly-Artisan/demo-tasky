@@ -3,7 +3,11 @@
 use FLY\Libs\Restmodels\Dto;
 use FLY\Security\Verify;
 use FLY_ENV\Util\Wave_Engine\Pattern;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs
+ * @version 2.0.0
+ */
 class FLYFormValidator extends Verify {
 
     private static $request;

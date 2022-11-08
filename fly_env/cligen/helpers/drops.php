@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 function createConnection($storeName, $modelName,$query,$app_reg)
 {
     $sql = new SQLCreateModel($storeName,$query,[

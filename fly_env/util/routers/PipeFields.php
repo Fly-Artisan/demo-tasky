@@ -2,14 +2,11 @@
 
 use FLY\DSource\App;
 use FLY_ENV\Util\Security\RouterNISearch;
-
 /**
  * @author K.B Brew <flyartisan@gmail.com>
+ * @package FLY_ENV\Util\Routers
  * @version 2.0.0
- * @package FLY_ENV\Util\PipeFields
  */
-
-
  abstract class PipeFields {
 
     private $controller;

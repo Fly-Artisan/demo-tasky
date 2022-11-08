@@ -1,6 +1,10 @@
 <?php namespace FLY\DOM;
-      use FLY\MVC\View;
-
+    use FLY\MVC\View;
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\DOM
+ * @version 2.0.0
+ */
 abstract class Widget extends \DOMDocument {
 
     private static $dom;

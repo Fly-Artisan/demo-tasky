@@ -1,5 +1,9 @@
 <?php namespace FLY\Security;
-
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @package FLY_ENV\Util\Security
+ * @version 2.0.0
+ */
 class KeyGen 
 {
     private static $charbank = [];
@@ -99,11 +103,6 @@ class KeyGen
     public static function primary_key(int $MAX_RANGE,string $format="",bool $set_time=false,string $sep="", int $sep_sequence=-1)
     {
         new Self;
-        $flag = TRUE;
-        if(!(strpos($format,'%key'))) {
-            $flag = FALSE;
-            self::$primaryKey = $format;
-        } 
 
         if(isset($MAX_RANGE)) {
             
@@ -118,10 +117,10 @@ class KeyGen
             $temp = self::$primaryKey;
             if($set_time === true)
                 $temp = self::get_time().self::$primaryKey;
-            self::$primaryKey = str_replace('%key',$temp,$format);
-            return self::addSeparator($flag ? (self::$primaryKey) : $temp,$sep,$sep_sequence);
+            $temp = str_replace('%key',self::$primaryKey,$format);
+            return self::addSeparator(is_empty($temp) ? (self::$primaryKey) : $temp,$sep,$sep_sequence);
         }else {
-            throw new \Exception("Unset key range");
+            throw new \Exception("Key range not set");
         }
     }
 
@@ -151,28 +150,21 @@ class KeyGen
 
     static private function tokenGenerate(int $MAX_RANGE,string $format="",bool $set_time=false)
     {
-        $flag = TRUE;
-        if(!(strpos($format,'%key'))) {
-            $flag = FALSE;
-            self::$token = $format;
-        } 
-
         if(isset($MAX_RANGE)) {
             for($i = 0; $i < $MAX_RANGE; $i++) {
                 $randIndexcontroller = mt_rand(0, self::$tokenbankLength);
                 $randIndex = mt_rand(0, self::$tokenLength); 
                 self::$token .= self::$tokenbank[$randIndexcontroller][$randIndex];
-
                 if(strlen(self::$token) === $MAX_RANGE) break;
             }
            
-            $temp = self::$token;
             if($set_time === true)
-                $temp = self::get_time().self::$token;
-            self::$token = str_replace('%key',$temp,$format);
-            return $flag ? (self::$token) : $temp;
+                self::$token = self::get_time().self::$token;
+            $temp = str_replace('%key',self::$token,$format);
+            self::$token = is_empty($temp) ? self::$token : $temp;
+            return self::$token;
         }else {
-            throw new \Exception("Unset key range");
+            throw new \Exception("Key range not set");
         }
     }
 

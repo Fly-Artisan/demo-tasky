@@ -7,13 +7,11 @@
  */
 
 namespace FLY\Libs\File_API;
-
-
 /**
- * Description of AuthFile
- *
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs\File_API
+ * @version 2.0.0
  */
-
 class AuthFile {
     
     private $file;

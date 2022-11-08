@@ -9,7 +9,6 @@
     {~ usecss('libs/mdb/css/mdb.min') ~}
     {~ usecss('fonts/font-awesome/css/font-awesome.min') ~}
     @usecss('style')
-
     <title>{~ $app_name ~}</title>
 </head>
 <body ng-app="{:val.ngApp}" ng-controller={:str.ngCtrl}>

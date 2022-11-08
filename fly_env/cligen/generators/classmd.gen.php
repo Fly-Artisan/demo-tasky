@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 class ClassModelGen {
 
    static public function createModels($dirName,$className,$fields,$pk,$fk,$config,$path)

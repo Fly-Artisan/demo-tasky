@@ -1,10 +1,9 @@
 <?php namespace FLY\Libs;
-
 /**
- * @author K.B Brew <flyartisan@gmail.com>
- * @package libs
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs
+ * @version 2.0.0
  */
-
 class Event {
     
     static private $callbacks = [];

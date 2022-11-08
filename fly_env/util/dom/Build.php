@@ -1,6 +1,8 @@
 <?php namespace FLY\DOM;
-
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\DOM
+ */
 class Build extends Widget {
 
     private $widget;

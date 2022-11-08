@@ -4,7 +4,6 @@
  * @package FLY\Model\Algorithm
  * @version 3.0.0
  */
-
 namespace FLY\Model\Algorithm;
 
 use FLY_ENV\Util\Model\QueryBuilder;

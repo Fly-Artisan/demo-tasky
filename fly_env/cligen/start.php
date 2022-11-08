@@ -1,4 +1,5 @@
 <?php
+
 require_once 'generators/cva.gen.php';
 require_once 'generators/md.gen.php';
 require_once 'generators/sqlcreate.gen.php';
@@ -12,7 +13,10 @@ require_once 'helpers/migration.php';
 require_once 'helpers/patterns.php';
 require_once 'helpers/drops.php';
 
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 define('FLY_ENV_CLI_PATH','fly_env'.DIRECTORY_SEPARATOR.'cligen');
 
 function init_cmds($argc="", array $argv=[]) {

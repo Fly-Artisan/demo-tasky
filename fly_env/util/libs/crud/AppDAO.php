@@ -1,5 +1,9 @@
 <?php namespace FLY\Libs\CRUD;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\Libs\CRUD
+ * @version 2.0.0
+ */
 class AppDAO implements CRUDRepository {
 
     public function __construct()

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @version 2.0.0
+ */
 define('FLY_ENV',DIRECTORY_SEPARATOR.'fly_env'.DIRECTORY_SEPARATOR.'initializer');
 define('FLY_ENV_APP_CONTROLLERS','app/controllers/');
 define('FLY_ENV_APP_MODELS','app/models/');

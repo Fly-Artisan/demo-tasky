@@ -6,7 +6,11 @@ use FLY\DSource\App;
 use FLY\DOM\{Widget,Build};
 use FLY\Libs\Restmodels\Dto;
 use FLY\Security\Sessions;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\MVC
+ * @version 2.0.0
+ */
 class View {
 
     private static $controller_payload = [];

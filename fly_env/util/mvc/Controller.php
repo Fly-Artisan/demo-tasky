@@ -2,7 +2,11 @@
 
 use App\Models\Model_Handles;
 use FLY\Libs\Request;
-
+/**
+ * @author  K.B. Brew <flyartisan@gmail.com>
+ * @package FLY\MVC
+ * @version 2.0.0
+ */
 class Controller {
 
     private static $view;

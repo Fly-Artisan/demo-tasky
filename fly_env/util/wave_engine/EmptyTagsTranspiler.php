@@ -1,6 +1,9 @@
 <?php namespace FLY_ENV\Util\Wave_Engine;
-
-
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @package FLY_ENV\Util\Wave_Engine
+ * @version 2.0.0
+ */
 class EmptyTagsTranspiler extends FMLTranslator {
 
     public function translate(): string

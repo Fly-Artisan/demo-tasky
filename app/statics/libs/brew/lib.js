@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * @author K.B Brew <flyartisan@gmail.com>
+ * @version 2.00
+ */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
