@@ -63,7 +63,7 @@ class AuthFile {
 
     private function file_types()
     {
-        return array('jpg','png','jpeg');
+        return array('jpg','png','jpeg','gif','raw','bmp','ico','icns');
     }
     
     public function is_present()

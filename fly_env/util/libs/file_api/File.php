@@ -132,6 +132,22 @@ class File {
         return file_exists(FLY_APP_ROOT_DIR.$fileName);
     }
 
+    public static function write($fileName,$message,$mode='w',$use_include_path=false)
+    {
+        $file = fopen($fileName,$mode,$use_include_path);
+        fwrite($file,$message);
+        fclose($file);
+        return basename($fileName);
+    }
+
+    public static function local_write($fileName,$message,$mode='w',$use_include_path=false)
+    {
+        $file = fopen(FLY_APP_ROOT_DIR.$fileName,$mode,$use_include_path);
+        fwrite($file,$message);
+        fclose($file);
+        return basename($fileName);
+    }
+
     public static function move_to(string $path) 
     {
         if(file_exists($path.self::$file['name'])) return (object)['state' => false, 'message' => 'file_exists'];

@@ -44,7 +44,7 @@ class UserVdt extends Validator {
 	{
 		return [
             'taskNum:num'                => 'Access Denied!!!. Cannot delete task',
-			'name:alphaNum'              => 'Your task name must be alpha numeric.',
+			'name:alphaNum'              => 'Please enter a valid task',
             'name:max|25|'               => 'Task name must not exceed 25.',
             'status:(completed,pending)' => 'Invalid status.'
 		];
@@ -81,7 +81,7 @@ class UserVdt extends Validator {
             {
                 return [
                     'name:?alphaNum' => 'Task name must alphabet or alpha numeric.',
-                    'name:?max|25|'   => 'Task name must not exceed 25.'
+                    'name:?max|25|'  => 'Task name must not exceed 25.'
                 ];
             }
 

@@ -4,7 +4,7 @@
             <wv:comp.CardHead {app_name} />
             <wv:comp.Spinner>
                 <div class="spinner-border text-danger" role="status">
-                    <span class="sr-only"> Loading....</span>
+                    <span class="sr-only">Loading....</span>
                 </div>
             </wv:comp.Spinner>
             <wv:comp.TaskList>

@@ -21,6 +21,11 @@ class FileReader {
         return self::fetch($path);
     }
 
+    static public function fetchLocalFile(string $path) 
+    {
+        return self::fetchFile(FLY_APP_ROOT_DIR.$path);
+    }
+
     static private function fetch(string $path) 
     {
         $content = NULL;

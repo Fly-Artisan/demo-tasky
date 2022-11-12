@@ -24,7 +24,6 @@ use FLY_ENV\Util\Neuro\Stage;
     {
         if($this->get_packet_valid()) {
             $this->stage = new Stage($this);
-            
             $this->execute_static_routers();
             $this->execute_cv_request();
             $this->execute_ct_request();

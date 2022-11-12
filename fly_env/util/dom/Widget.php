@@ -136,7 +136,7 @@ abstract class Widget extends \DOMDocument {
         }
     }
 
-    private final function strictClass($type) 
+    protected final function strictClass($type) 
     {
         return new class($type) extends Widget {
 
