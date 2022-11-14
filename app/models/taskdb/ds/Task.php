@@ -22,19 +22,17 @@ class Task extends QueryBuilder {
 
 	protected $dateAdded;
 
-
 	use Model_Controllers;
 
 	public function __construct($id="",$name="",$status="",$dateAdded="") 
 	{
     	parent::__construct($this);
-		$this->id = $id;
-		$this->name = $name;
-		$this->status = $status;
+		$this->id        = $id;
+		$this->name      = $name;
+		$this->status    = $status;
 		$this->dateAdded = $dateAdded;
+    	$this->pk_names  = [ 'id' ];
 
-    	$this->pk_names=[ 'id' ];
-    	
     	$this->apply();
 	}
 
@@ -53,7 +51,7 @@ class Task extends QueryBuilder {
 			'user'
 
 				=> 'default',
-
+				
 			'password'
 
 				=> 'default',

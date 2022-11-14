@@ -1,5 +1,4 @@
 <?php namespace App\Controllers;
-
 use App\Actors\VDT\UserVdt;
 use FLY\Libs\Request;
 use FLY\MVC\Controller;

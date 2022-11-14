@@ -1,5 +1,7 @@
 <?php namespace App\Models;
 
+use App\Models\taskdb\DS\Task;
+
 trait Model_Handles 
 {
 
@@ -9,6 +11,9 @@ trait Model_Handles
      */
     private function main(): void
     {
+        Task::createQuery('Tech',function($self) {
+            unset($self['[*]']);
+        });
         // Write your model procedures, queries and methods here
     }
 }
